@@ -26,6 +26,8 @@ export class BotGateway {
 
     @On('interactionCreate')
     async onIntentionCreate(interaction: AutocompleteInteraction) {
+        if (interaction.isCommand()) return;
+
         const focusedParameter = interaction.options.getFocused(true);
 
         console.log('focusedParameter: ', focusedParameter.name)
