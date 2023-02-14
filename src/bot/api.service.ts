@@ -1,6 +1,7 @@
 import { HttpService } from "@nestjs/axios";
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { map } from "rxjs";
 
 @Injectable()
 export class IW4MApiService {
@@ -20,7 +21,7 @@ export class IW4MApiService {
             if (!(response.status === 200)) {
                 this.logger.error('Error while fetching server info');
             }
-            this.serverId = response.data.id;
+            this.serverId = response.data[0].id;
         })
     }
 
@@ -28,9 +29,44 @@ export class IW4MApiService {
         return this.httpService.get(`${this.iw4Url}/api/server`)
     }
 
-    sendCommand(cmd: string) {
+    // TODO: cleanup after dev tests, to improve alot
+    sendCommand(cmd: string, headers: any) {
         return this.httpService.post(`${this.iw4Url}/api/server/${this.serverId}/execute`, {
             "Command": cmd
-        })
+        }, {
+            headers: {
+                'cookie': headers,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json' 
+            },
+        }).pipe(map((data) => {
+            console.log('[Command] ', data.status)
+            console.log('[Command/Response]', data.data);
+        }))
+    }
+
+    sendCommands(cmds: Array<string>): any {
+        return this.httpService.post(`${this.iw4Url}/api/client/1/login`, {
+            "password": "d5CR"
+        }, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json' 
+            },  
+        }).pipe(
+            map((value) => {
+                console.log('[Token] ', value.status)
+                console.log('[Token] ', value.data)
+                return cmds.forEach((command) => {{
+                    if (command.includes('map_rotate')) {
+                        setTimeout(() => {
+                            this.sendCommand(command, value.headers["set-cookie"]).subscribe();
+                        }, 3000)
+                    } else {
+                        this.sendCommand(command, value.headers["set-cookie"]).subscribe();
+                    }
+                }
+            })
+        })).subscribe()
     }
 }

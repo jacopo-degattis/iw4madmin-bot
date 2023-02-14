@@ -17,19 +17,8 @@ export enum GameMap {
 }
 
 export enum GameMode {
-    CLASSIC = "CLASSIC",
-    STANDARD = "STANDARD",
-    GRIEF = "GRIEF",
-    TURNED = "TURNED", // Same as CLEANSED
-}
-
-// TODO: extend this list with all the available options
-const availableModesByMap: Record<string, Array<string>> = {
-    [GameMap.TRANSIT]: [GameMode.CLASSIC],
-    [GameMap.FARM]: [GameMode.STANDARD, GameMode.GRIEF] 
-}
-
-// TODO: maybe move into utils
-export const getAvailableModesByMap: (map: GameMap) => Array<string> = (map) => {
-    return availableModesByMap[map];
+    CLASSIC = "classic",
+    STANDARD = "standard",
+    GRIEF = "grief",
+    TURNED = "cleansed", // Same as CLEANSED
 }
