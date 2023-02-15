@@ -3,7 +3,7 @@ import { Command, EventParams, Handler, InteractionEvent } from "@discord-nestjs
 import { ClientEvents } from 'discord.js';
 import { SetGameDto } from '../dtos/set-game.dto';
 import { IW4MApiService } from '../api.service';
-import { getMapConfigByName } from '../utils';
+import { getMapConfigByName, translate } from '../utils';
 
 @Command({
     name: 'set-game',
@@ -20,25 +20,19 @@ export class SetGameCommand {
         @InteractionEvent(SlashCommandPipe) dto: SetGameDto,
         @EventParams() args: ClientEvents['interactionCreate']
     ) {
-        
-        let rawCommand: string = "";
         let mapConfig = getMapConfigByName(dto.map);
 
-        if (mapConfig.filenames) {
-            rawCommand = `!rcon sv_maprotation "exec zm_${dto.gamemode}_${mapConfig.filenames[dto.gamemode]}.cfg map ${mapConfig.codeName}"`;
-        } else {
-            rawCommand = `!rcon sv_maprotation "exec zm_${dto.gamemode}_${dto.map}.cfg map ${mapConfig.codeName}"`;
-        }
+        let map: string = mapConfig.filenames ?
+                mapConfig.filenames[dto.gamemode]
+            : dto.map;
 
-        if (!rawCommand) {
-            console.log('No raw command leaving...')
-            // Handle error, return for now
-            return;
-        }
+        const rawCommand = `!rcon sv_maprotation "exec zm_${dto.gamemode}_${map}.cfg map ${mapConfig.codeName}"`;
         
-        // TODO: Improve .sendCommand method code
         this.apiService.sendCommands([rawCommand, '!rcon map_rotate']);
-
-        return `Switching to map ${dto.map} with gamemode ${dto.gamemode}`;
+        
+        // TODO:
+        // Return the following message only if the command goes without errors
+        // Otherwise return an error always tagging the user that requested it
+        return `<@${args[0].user.id}> I'm switching to map "${translate(dto.map)}" with gamemode "${dto.gamemode}"`;
     }
 }
