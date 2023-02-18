@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose from "mongoose";
 import { Vote } from "../vote/vote.entity";
 
-@Schema()
+@Schema({ timestamps: true })
 export class Poll {
   _id: mongoose.Schema.Types.ObjectId;
 
@@ -19,7 +19,12 @@ export class Poll {
 
   @Prop({ required: true })
   votes: Array<Vote>
+
 }
 
 export type PollDocument = Poll & Document;
 export const PollSchema = SchemaFactory.createForClass(Poll);
+
+// Remove all entries in collection after 'expireAfterSeconds'
+// In this case after 2 hours
+PollSchema.index({ createAt: 1 }, { expireAfterSeconds: 7200 })
