@@ -1,13 +1,10 @@
 import { Module } from '@nestjs/common';
 import { DiscordModule } from '@discord-nestjs/core';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { GatewayIntentBits } from 'discord.js';
 import { BotModule } from './bot/bot.module';
 import { IW4MAdminModule } from './bot/modules/iw4madmin/iw4madmin.module';
 import { MongoModule } from './bot/modules/mongo/mongo.module';
-import { PollModule } from './bot/models/poll/poll.module';
-import { PollService } from './bot/models/poll/poll.service';
-import { ModelsModule } from './bot/models/models.module';
 
 @Module({
   imports: [
