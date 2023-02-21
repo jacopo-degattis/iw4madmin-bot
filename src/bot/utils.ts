@@ -1,5 +1,12 @@
-import { Collection, Interaction, NonThreadGuildBasedChannel } from "discord.js";
+import { Collection, GuildMember, Interaction, NonThreadGuildBasedChannel, Role } from "discord.js";
 import { GameMap, GameMode } from "./common/enums/set-game.enum";
+import { Roles } from "./common/enums/roles.enum";
+
+export async function memberHasRole(role: Roles, member: GuildMember): Promise<boolean> {
+  return member.roles.cache.filter(currRole => {
+    return currRole.name === role
+  }).size > 0;
+}
 
 export async function getVoiceChannels(interaction: Interaction): Promise<Collection<string, NonThreadGuildBasedChannel>> {
   const channels = await interaction.guild.channels.fetch();
