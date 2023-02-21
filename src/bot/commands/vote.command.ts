@@ -44,6 +44,10 @@ export class VoteCommand {
     // And i know that there is at least one because of control line 35
     const voiceChannel = clientCurrentVoiceChannel.at(0);
 
+    if (!(await this.pollService.get({ channelId: voiceChannel.id }))) {
+      return `${tagUser(clientEvent)}, no poll is pending for this channel`
+    }
+
     await this.voteService.create(dto.votez as any, clientEvent.user.id, voiceChannel.id);
 
     // If all members have voted and percentage is not equal or higher than 50 than don't launch the command and remove the poll entry in DB
