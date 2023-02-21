@@ -1,18 +1,19 @@
-import { SlashCommandPipe } from '@discord-nestjs/common';
+import { SlashCommandPipe } from "@discord-nestjs/common";
 import { Command, EventParams, Handler, InteractionEvent } from "@discord-nestjs/core";
-import { ClientEvents } from 'discord.js';
-import { SetGameDto } from '../common/dtos/commands/set-game.dto';
-import { getClientCurrentVoiceChannel, getMapConfigByName, tagUser, translate } from '../utils';
-import { PollService } from '../models/poll/poll.service';
+import { SetGameDto } from "../common/dtos/commands/set-game.dto";
+import { ClientEvents, GuildMember, GuildMemberRoleManager, Role } from "discord.js";
+import { getMapConfigByName, memberHasRole, tagUser } from "../utils";
+import { IW4MApiService } from "../modules/iw4madmin/iw4madmin.service";
+import { Roles } from "../common/enums/roles.enum";
 
 @Command({
   name: 'set-game',
-  description: 'Set map and gametype',
+  description: 'Directly set new map and gamemode'
 })
 export class SetGameCommand {
 
   constructor(
-    private pollService: PollService,
+    private apiService: IW4MApiService
   ) { }
 
   @Handler()
@@ -20,34 +21,28 @@ export class SetGameCommand {
     @InteractionEvent(SlashCommandPipe) dto: SetGameDto,
     @EventParams() args: ClientEvents['interactionCreate']
   ) {
+
     const [clientEvent] = args;
 
-    const clientCurrentVoiceChannel = await getClientCurrentVoiceChannel(clientEvent, clientEvent.user.id);
+    if (!clientEvent.isCommand()) return;
 
-    if (clientCurrentVoiceChannel.size === 0) return `${tagUser(clientEvent)}, you must be inside a voice channel to start a poll !`;
+    const currentMember: GuildMember = clientEvent.member as GuildMember;
 
-    const currentVoiceChannel = clientCurrentVoiceChannel.at(0);
+    console.log('Checking role ', Roles.COMMANDER);
 
-    const alreadyExists = await this.pollService.exists(currentVoiceChannel.id, dto.map, dto.gamemode);
-
-    if (alreadyExists) {
-      return `<@${clientEvent.user.id}> A polling for this map with the given gamemode is already pending in this channel`
+    if (!(await memberHasRole(Roles.COMMANDER, currentMember))) {
+      return `${tagUser(clientEvent)}, you don't have the role necessary to execute this command`
     }
 
-    await this.pollService.createAndReplace({
-      channelId: currentVoiceChannel.id,
-      pollName: dto.map,
-      gamemode: dto.gamemode,
-      votes: []
-    })
+    const mapConfig = getMapConfigByName(dto.map);
 
-    // TODO:
-    // Return the following message only if the command goes without errors
-    // Otherwise return an error always tagging the user that requested it
+    let map: string = mapConfig.filenames ?
+      mapConfig.filenames[dto.gamemode]
+      : dto.map;
 
-    // This message sould be returned if 'vote' options is skipped (feature still to be developed TODO:)
-    // return `<@${args[0].user.id}> I'm switching to map "${translate(dto.map)}" with gamemode "${dto.gamemode}"`;
+    const rawCommand = `!rcon sv_maprotation "exec zm_${dto.gamemode}_${map}.cfg map ${mapConfig.codeName}"`;
+    this.apiService.sendCommands([rawCommand, '!rcon map_rotate']);
 
-    return `${tagUser(clientEvent)}, a poll for map "${translate(dto.map)}" with gamemode "${dto.gamemode}" is being created.\nEveryone should vote !`
+    return `Skipping vote and setting map ${map} with gamemode ${dto.gamemode}`;
   }
 }
