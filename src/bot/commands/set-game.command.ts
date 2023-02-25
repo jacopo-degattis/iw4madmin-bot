@@ -1,10 +1,12 @@
+import { ClientEvents, GuildMember } from "discord.js";
 import { SlashCommandPipe } from "@discord-nestjs/common";
 import { Command, EventParams, Handler, InteractionEvent } from "@discord-nestjs/core";
-import { SetGameDto } from "../common/dtos/commands/set-game.dto";
-import { ClientEvents, GuildMember, GuildMemberRoleManager, Role } from "discord.js";
-import { getMapConfigByName, memberHasRole, tagUser } from "../utils";
-import { IW4MApiService } from "../modules/iw4madmin/iw4madmin.service";
+
+import { memberHasRole, tagUser } from "../utils";
 import { Roles } from "../common/enums/roles.enum";
+import { getMapConfigByName } from '../maps.mapping';
+import { SetGameDto } from "../common/dtos/commands/set-game.dto";
+import { IW4MApiService } from "../modules/iw4madmin/iw4madmin.service";
 
 @Command({
   name: 'set-game',
@@ -28,8 +30,6 @@ export class SetGameCommand {
 
     const currentMember: GuildMember = clientEvent.member as GuildMember;
 
-    console.log('Checking role ', Roles.COMMANDER);
-
     if (!(await memberHasRole(Roles.COMMANDER, currentMember))) {
       return `${tagUser(clientEvent)}, you don't have the role necessary to execute this command`
     }
@@ -41,7 +41,7 @@ export class SetGameCommand {
       : dto.map;
 
     const rawCommand = `!rcon sv_maprotation "exec zm_${dto.gamemode}_${map}.cfg map ${mapConfig.codeName}"`;
-    this.apiService.sendCommands([rawCommand, '!rcon map_rotate']);
+    // this.apiService.sendCommands([rawCommand, '!rcon map_rotate']);
 
     return `Skipping vote and setting map ${map} with gamemode ${dto.gamemode}`;
   }

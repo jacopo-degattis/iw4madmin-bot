@@ -17,7 +17,8 @@ import { MongoModule } from './bot/modules/mongo/mongo.module';
             intents: [
               GatewayIntentBits.Guilds,
               GatewayIntentBits.GuildMessages,
-              GatewayIntentBits.GuildVoiceStates
+              GatewayIntentBits.GuildVoiceStates,
+              GatewayIntentBits.GuildMessageReactions
             ]
           },
           registerCommandOptions: [{

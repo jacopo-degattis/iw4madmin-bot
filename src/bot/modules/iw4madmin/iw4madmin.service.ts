@@ -1,8 +1,9 @@
 import { HttpService } from "@nestjs/axios";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { Subscription, catchError, delay, forkJoin, map } from "rxjs";
-import { CONFIG_OPTIONS } from "./iw4madmin.consts";
+
 import { Config } from "./iw4madmin.config";
+import { CONFIG_OPTIONS } from "./iw4madmin.consts";
 
 @Injectable()
 export class IW4MApiService {

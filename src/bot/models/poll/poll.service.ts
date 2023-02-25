@@ -1,9 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Poll, PollDocument } from "./poll.entity";
-import { Model, UpdateWriteOpResult } from "mongoose";
-import { PollDto } from "src/bot/common/dtos/models/poll.dto";
+import { Model, ObjectId, UpdateWriteOpResult } from "mongoose";
+
 import { VoteValue } from "../vote/vote.entity";
+import { Poll, PollDocument } from "./poll.entity";
+import { PollDto } from "src/bot/common/dtos/models/poll.dto";
 
 @Injectable()
 export class PollService {
@@ -14,7 +15,6 @@ export class PollService {
   ) { }
 
   async create(pollData: PollDto): Promise<Poll> {
-    // TODO: Add support for multiple polls at the same time ?
     return await this.pollModel.create(pollData);
   }
 
@@ -40,6 +40,7 @@ export class PollService {
     return !!(await this.pollModel.findOne({ channelId: channelId, pollName: mapName, gamemode: gamemode }));
   }
 
+  // Check whether a user with discordId has already voted or not
   async hasVoted(discordId: string): Promise<any> {
     const found = await this.pollModel.find({
       "votes.from": discordId
@@ -47,28 +48,28 @@ export class PollService {
     return found.length === 1
   }
 
-  // Add a new vote inside the Poll entry with _id equale to 'vote.belongTo'
+  // Add a new vote inside the Poll entry with _id equal to 'vote.belongTo'
   async addVote(vote: any): Promise<UpdateWriteOpResult> {
     return await this.pollModel.updateOne({ _id: vote.belongTo }, {
       $push: { votes: vote },
     });
   }
 
+  async removeVote(from: string, pollId: ObjectId): Promise<UpdateWriteOpResult> {
+    return await this.pollModel.updateOne({ _id: pollId }, {
+      $pull: {
+        votes: { from: from }
+      }
+    })
+  }
+
   // Returns the percentage of upvotes that the poll has received
-  // TODO: improve this function maybe with filter
   async getUpVotesPercentage(channelId: string, membersNumber: number): Promise<number> {
     const currentPoll = await this.get({ channelId: channelId });
 
-    const result = { UP_VOTES: 0, DOWN_VOTES: 0 };
+    const upVotesCount = currentPoll.votes
+      .filter(vote => vote.vote === VoteValue.UP).length;
 
-    currentPoll.votes.forEach((vote) => {
-      if (vote.vote.toUpperCase() === VoteValue.UP) {
-        result.UP_VOTES++;
-      } else if (vote.vote.toUpperCase() === VoteValue.DOWN) {
-        result.DOWN_VOTES++;
-      }
-    })
-
-    return parseInt((result.UP_VOTES * 100 / membersNumber).toFixed());
+    return parseInt((upVotesCount * 100 / membersNumber).toFixed());
   }
 }

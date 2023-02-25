@@ -1,8 +1,9 @@
+import { HttpModule } from "@nestjs/axios";
 import { DynamicModule, Module } from "@nestjs/common";
+
 import { Config } from "./iw4madmin.config";
 import { CONFIG_OPTIONS } from "./iw4madmin.consts";
 import { IW4MApiService } from "./iw4madmin.service";
-import { HttpModule, HttpService } from "@nestjs/axios";
 
 @Module({})
 export class IW4MAdminModule {

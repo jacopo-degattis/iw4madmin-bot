@@ -1,7 +1,8 @@
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
-import { Poll, PollSchema } from "./poll.entity";
+
 import { PollService } from "./poll.service";
+import { Poll, PollSchema } from "./poll.entity";
 
 @Module({
   imports: [
