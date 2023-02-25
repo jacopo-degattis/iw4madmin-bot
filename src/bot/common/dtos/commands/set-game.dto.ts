@@ -1,5 +1,6 @@
-import { Choice, Param } from '@discord-nestjs/core';
+import { Param } from '@discord-nestjs/core';
 import { Transform } from 'class-transformer';
+
 import { GameMap, GameMode } from '../../enums/set-game.enum';
 
 export class SetGameDto {

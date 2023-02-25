@@ -1,9 +1,11 @@
 import { SlashCommandPipe } from '@discord-nestjs/common';
-import { Command, EventParams, Handler, InteractionEvent } from "@discord-nestjs/core";
-import { ClientEvents } from 'discord.js';
 import { SetGameDto } from '../common/dtos/commands/set-game.dto';
-import { getClientCurrentVoiceChannel, tagUser, translate } from '../utils';
+import { Client, ClientEvents, PermissionFlagsBits } from 'discord.js';
+import { Command, EventParams, Handler, InjectDiscordClient, InteractionEvent } from "@discord-nestjs/core";
+
 import { PollService } from '../models/poll/poll.service';
+import { Emoticon } from '../common/enums/emoji.enum';
+import { GenericException, getClientCurrentVoiceChannel, getCurrentBotTextChannel, tagUser, translate } from '../utils';
 
 @Command({
   name: 'poll',
@@ -13,6 +15,9 @@ export class PollCommand {
 
   constructor(
     private pollService: PollService,
+
+    @InjectDiscordClient()
+    private readonly client: Client,
   ) { }
 
   @Handler()
@@ -21,6 +26,8 @@ export class PollCommand {
     @EventParams() args: ClientEvents['interactionCreate']
   ) {
     const [clientEvent] = args;
+
+    if (!clientEvent.isRepliable()) throw new GenericException('onPollCommand(): Interaction is not repliable');
 
     const clientCurrentVoiceChannel = await getClientCurrentVoiceChannel(clientEvent, clientEvent.user.id);
 
@@ -41,13 +48,22 @@ export class PollCommand {
       votes: []
     })
 
-    // TODO:
-    // Return the following message only if the command goes without errors
-    // Otherwise return an error always tagging the user that requested it
+    // NOTE: rn the bot takes the 'votes' channel the one where it is invoked the first time
+    const currTextChannel = await getCurrentBotTextChannel(clientEvent);
+    const hasPermission = currTextChannel.permissionOverwrites.cache.get(currTextChannel.guild.id)
 
-    // This message sould be returned if 'vote' options is skipped (feature still to be developed TODO:)
-    // return `<@${args[0].user.id}> I'm switching to map "${translate(dto.map)}" with gamemode "${dto.gamemode}"`;
+    // Remove 'ADD_REACTIONS' permission only if it's not already there
+    if (!(hasPermission.deny.has(PermissionFlagsBits.AddReactions))) {
+      await currTextChannel.permissionOverwrites.edit(clientEvent.guild.roles.everyone.id, { AddReactions: false });
+    }
 
-    return `${tagUser(clientEvent)}, a poll for map "${translate(dto.map)}" with gamemode "${dto.gamemode}" is being created.\nEveryone should vote !`
+    const responseMessage = await clientEvent.reply({
+      content: `${tagUser(clientEvent)}, a poll for map "${translate(dto.map)}" with gamemode "${dto.gamemode}" is being created.\nEveryone should vote !`,
+      fetchReply: true,
+    })
+
+    await responseMessage.react(Emoticon.CheckMark);
+    await responseMessage.react(Emoticon.RedCross);
+
   }
 }
