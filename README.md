@@ -34,3 +34,17 @@ After you setup the .env file you can launch the bot using:
   // For prod mode
   $ pnpm run start
 ```
+
+## Running the bot through Docker
+
+First create a .env file inside the root directory of the project.
+
+You should set the following variables:
+
+- ENV: dev | "anything else"
+- SERVER_IP: Ip address of the server hosting the iw4madmin platform
+- SERVER_PORT: Port where iw4madmin is listening onto
+- BOT_TOKEN: Token of the discord bot you'd like to use
+- BOT_GUILD_ID: Guild id of the discord server which use this bot
+
+N.B: don't touch mongo configuration
