@@ -6,12 +6,10 @@ import { MongooseModule } from "@nestjs/mongoose";
     MongooseModule.forRootAsync({
       useFactory: () => {
         return {
-          // TODO: make them configurable in .env file
-          // migrate to .yaml file instead of .env one ?
-          uri: 'mongodb://127.0.0.1:27017',
-          dbName: 'iw4',
-          user: 'admin',
-          pass: 'admin'
+          uri: `mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_PORT}`,
+          dbName: process.env.MONGO_DB_NAME,
+          user: process.env.MONGO_USER,
+          pass: process.env.MONGO_PASSWORD
         }
       }
 

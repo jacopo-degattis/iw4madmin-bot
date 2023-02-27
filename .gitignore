@@ -2,6 +2,7 @@
 /dist
 /node_modules
 launch-dev.sh
+.env
 
 # Logs
 logs
