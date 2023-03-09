@@ -41,12 +41,6 @@ export class PollService {
   }
 
   // Check whether a user with discordId has already voted or not
-  async hasVoted(discordId: string): Promise<any> {
-    const found = await this.pollModel.find({
-      "votes.from": discordId
-    }).exec()
-    return found.length === 1
-  }
 
   // Add a new vote inside the Poll entry with _id equal to 'vote.belongTo'
   async addVote(vote: any): Promise<UpdateWriteOpResult> {

@@ -32,14 +32,14 @@ export class BotGateway {
   }
 
   // TODO: dont use string use something else
-  async addVote(voteValue: string, message: Message | PartialMessage, emoji: GuildEmoji | ReactionEmoji) {
+  async addVote(voteValue: string, message: Message | PartialMessage, emoji: GuildEmoji | ReactionEmoji, user: ClientUser) {
 
     const { interaction } = message;
 
     const guild = this.client.guilds.cache.get(process.env.GUILD_ID_WITH_COMMANDS);
 
     const voiceChannels = await getVoiceChannelsByGuild(guild);
-    const currentVoiceChannels = await getUserCurrentVoiceChannel(voiceChannels, interaction.user.id);
+    const currentVoiceChannels = await getUserCurrentVoiceChannel(voiceChannels, user.id);
 
     if (currentVoiceChannels.size === 0) {
       await message.reply(
@@ -55,20 +55,28 @@ export class BotGateway {
       return await message.reply(`${tagUser(interaction as Interaction)} , no poll is pending for this channel`);
     }
 
-    const hasVoted = await this.pollService.hasVoted(interaction.user.id);
+    const hasVoted = await this.voteService.hasVoted(currentVoiceChannel.id, user.id);
 
     if (hasVoted) {
 
-      // Remove reactions if user has already voted
-      await message.reactions.cache
-        .find(reaction => reaction.emoji.identifier === emoji.identifier)
-        .users.remove(interaction.user.id);
+      // First remove the old vote and then add the new one
+      const previousReactions = message.reactions.cache
+        .filter(reaction => reaction.users.cache
+          .find(usr => usr.id === user.id))
 
-      return await message.reply(`${tagUser(interaction as Interaction)} You can't vote twice !`);
+      const lookFor: string = emoji.identifier === Emoticon.CheckMark ? Emoticon.RedCross : Emoticon.CheckMark;
+
+      const previousReaction = previousReactions.filter(x => {
+        return x.emoji.identifier === lookFor
+      });
+
+      const data = previousReaction.at(0);
+
+      data.users.remove(user.id);
 
     }
 
-    await this.voteService.create(voteValue as any, interaction.user.id, currentVoiceChannel.id);
+    await this.voteService.create(voteValue as any, user.id, currentVoiceChannel.id);
 
     // If all members have voted and percentage is not equal or higher than 50 than don't launch the command and remove the poll entry in DB
     // Check if UP votes percentage is high enough relatively to members, in that case launch the command
@@ -89,21 +97,19 @@ export class BotGateway {
       const rawCommand = `!rcon sv_maprotation "exec zm_${currentPollMapName.gamemode}_${map}.cfg map ${mapConfig.codeName}"`;
       // this.apiService.sendCommands([rawCommand, '!rcon map_rotate']);
 
-      await message.reply(
-        `Thank you ${tagUser(interaction as Interaction)}, your vote has been removed succesfully !`
+      return await message.reply(
+        `Percentage got bigger than 50%, switching to ${map} with gamemode ${currentPollMapName.gamemode}`
       )
     }
 
-    await message.reply(
-      `Thank you ${tagUser(interaction as Interaction)}, your vote has been registered !`
-    )
+    // return await message.reply(
+    //   `Thank you ${tagUser(interaction as Interaction)}, your vote has been registered !`
+    // )
   }
 
   // I just need ClientUser because the user can only vote once, so
   // If i delete his vote I'm sure that I delete his one
   async removeVote(user: ClientUser, message: Message | PartialMessage) {
-
-    const { interaction } = message;
 
     const guild = this.client.guilds.cache.get(process.env.GUILD_ID_WITH_COMMANDS);
 
@@ -127,8 +133,8 @@ export class BotGateway {
       const rawCommand = `!rcon sv_maprotation "exec zm_${currentPollMapName.gamemode}_${map}.cfg map ${mapConfig.codeName}"`;
       // TODO: this.apiService.sendCommands([rawCommand, '!rcon map_rotate']);
 
-      await message.reply(
-        `Votes for this map reached >= 50%, switching to ${map} with gamemode ${currentPollMapName.gamemode}`
+      return await message.reply(
+        `Percentage got bigger than 50%, switching to ${map} with gamemode ${currentPollMapName.gamemode}`
       )
     }
   }
@@ -193,12 +199,12 @@ export class BotGateway {
     switch (data.emoji.identifier as Emoticon) {
 
       case Emoticon.CheckMark: {
-        this.addVote('UP', data.message, data.emoji);
+        this.addVote('UP', data.message, data.emoji, user);
         break;
       }
 
       case Emoticon.RedCross: {
-        this.addVote('DOWN', data.message, data.emoji);
+        this.addVote('DOWN', data.message, data.emoji, user);
         break;
       }
 
