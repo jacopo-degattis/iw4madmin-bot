@@ -23,16 +23,6 @@ export class IW4MApiService {
   ) {
     this.iw4Url = `http://${this.configService.address}:${this.configService.port}`
 
-    // TODO: should i remove this or not
-    // TODO: should the bot at runtime select the first available server
-    // and then if the user wants he can change it using the '/select' command ?
-    // this.fetchServerId().subscribe(response => {
-    //   if (!(response.status === 200)) {
-    //     this.logger.error('Error while fetching server info');
-    //   }
-    //   this.serverId = response.data[0].id;
-    // })
-
     this._availableServers = this.fetchServers();
 
     if (this._availableServers.length > 0) {

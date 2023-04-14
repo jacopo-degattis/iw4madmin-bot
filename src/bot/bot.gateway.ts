@@ -98,16 +98,9 @@ export class BotGateway {
       const rawCommand = `!rcon sv_maprotation "exec zm_${currentPollMapName.gamemode}_${map}.cfg map ${currentMap.key}"`;
       console.log('Raw cmd,', rawCommand);
 
-      // this.apiService.sendCommands([rawCommand, '!rcon map_rotate']);
-
-      await message.reply(
-        `Thank you ${tagUser(interaction as Interaction)}, your vote has been removed succesfully !`
-      )
+      this.apiService.sendCommands([rawCommand, '!rcon map_rotate']);
     }
 
-    await message.reply(
-      `Thank you ${tagUser(interaction as Interaction)}, your vote has been registered !`
-    )
   }
 
   // I just need ClientUser because the user can only vote once, so
