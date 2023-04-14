@@ -29,4 +29,5 @@ export const PollSchema = SchemaFactory.createForClass(Poll);
 // Remove all entries in collection after 'expireAfterSeconds'
 // In this case after 2 hours
 // TODO: check this function because rn it gets deleted much before 7200 seconds (2 hours)
-PollSchema.index({ createAt: 1 }, { expireAfterSeconds: 7200 })
+// TODO: not working properly
+// PollSchema.index({ createAt: 1 }, { expireAfterSeconds: 7200 })
