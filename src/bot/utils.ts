@@ -1,6 +1,7 @@
 import { Collection, Guild, GuildMember, Interaction, NonThreadGuildBasedChannel } from "discord.js";
 
 import { Roles } from "./common/enums/roles.enum";
+import { GameType } from "./modules/iw4madmin/iw4madmin.enum";
 
 type ChannelCollection = Collection<string, NonThreadGuildBasedChannel>;
 
@@ -62,6 +63,12 @@ export function translate(name: string): string {
   return name.split('_').map(word => {
     return `${word.charAt(0).toUpperCase()}${word.slice(1)}`
   }).join(' ');
+}
+
+export function getGamemodeFromMap(mapName: string): GameType {
+  if (!(mapName.startsWith('zm') || mapName.startsWith('mp'))) return;
+
+  return mapName.split('_')[0] as GameType;
 }
 
 export const GenericException: (message: string) => void = (message) => {

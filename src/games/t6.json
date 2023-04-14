@@ -1,0 +1,98 @@
+{
+  "game": "Call Of Duty Black Ops 2",
+  "short_name": "t6",
+  "maps": [
+    {
+      "key": "zm_transit_dr",
+      "name": "diner",
+      "gamemodes": [
+        "cleansed"
+      ]
+    },
+    {
+      "key": "zm_transit",
+      "name": "transit",
+      "gamemodes": [
+        "classic"
+      ]
+    },
+    {
+      "key": "zm_transit",
+      "name": "farm",
+      "gamemodes": [
+        "standard",
+        "grief"
+      ]
+    },
+    {
+      "key": "zm_transit",
+      "name": "town",
+      "gamemodes": [
+        "standard",
+        "grief"
+      ]
+    },
+    {
+      "key": "zm_transit",
+      "name": "bus_depot",
+      "gamemodes": [
+        "standard",
+        "grief"
+      ]
+    },
+    {
+      "key": "zm_tomb",
+      "name": "origins",
+      "gamemodes": [
+        "classic"
+      ],
+      "filenames": {
+        "classic": "tomb"
+      }
+    },
+    {
+      "key": "zm_nuked",
+      "name": "nuketown",
+      "gamemodes": [
+        "standard"
+      ],
+      "filenames": {
+        "standard": "nuked"
+      }
+    },
+    {
+      "key": "zm_prison",
+      "name": "mob_of_the_dead",
+      "gamemodes": [
+        "classic",
+        "grief"
+      ],
+      "filenames": {
+        "classic": "prison",
+        "grief": "cellblock"
+      }
+    },
+    {
+      "key": "zm_highrise",
+      "name": "die_rise",
+      "gamemodes": [
+        "classic"
+      ],
+      "filenames": {
+        "classic": "rooftop"
+      }
+    },
+    {
+      "key": "zm_buried",
+      "name": "buried",
+      "gamemodes": [
+        "classic",
+        "cleansed"
+      ],
+      "filenames": {
+        "classic": "processing",
+        "cleansed": "street"
+      }
+    }
+  ]
+}

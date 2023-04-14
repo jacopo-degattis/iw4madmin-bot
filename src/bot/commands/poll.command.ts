@@ -6,6 +6,7 @@ import { Command, EventParams, Handler, InjectDiscordClient, InteractionEvent } 
 import { PollService } from '../models/poll/poll.service';
 import { Emoticon } from '../common/enums/emoji.enum';
 import { GenericException, getClientCurrentVoiceChannel, getCurrentBotTextChannel, tagUser, translate } from '../utils';
+import { GameParserService } from '../common/services/game-parser/game-parser.service';
 
 @Command({
   name: 'poll',
